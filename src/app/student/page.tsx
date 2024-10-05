@@ -1,7 +1,7 @@
 "use client";
 
 import { $authenStore } from "@lib/authenStore";
-import { Course } from "@lib/types";
+import { EnrollmentPrisma } from "@lib/types";
 
 import {
   Button,
@@ -20,9 +20,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function StudentPage() {
-  const [myEnrollments, setMyEnrollments] = useState<Course[] | null>(null);
+  const [myEnrollments, setMyEnrollments] = useState<EnrollmentPrisma[] | null>(null);
   const [loadingMyEnrollments, setLoadingMyEnrollments] = useState(false);
 
+  // const [loadingEnrolling, setLoadingEnrolling] = useState(false);
   const [loadingDropping, setLoadingDropping] = useState("");
   const [courseNo, setCourseNo] = useState("");
   const router = useRouter();
@@ -51,7 +52,7 @@ export default function StudentPage() {
 
   const callEnrollApi = async () => {
     try {
-      await axios.post(
+      const resp = await axios.post(
         "/api/enrollments",
         {
           courseNo,
@@ -60,6 +61,7 @@ export default function StudentPage() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      console.log(resp);
       setCourseNo("");
       loadMyCourses();
     } catch (error) {
@@ -81,12 +83,13 @@ export default function StudentPage() {
   const callDropApi = async (drop_courseNo: string) => {
     setLoadingDropping(drop_courseNo);
     try {
-      await axios.delete("/api/enrollments", {
+      const resp = await axios.delete("/api/enrollments", {
         data: {
           courseNo: drop_courseNo,
         },
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log(resp);
       loadMyCourses();
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -116,7 +119,7 @@ export default function StudentPage() {
         <Title order={4}>My Course(s)</Title>
 
         {myEnrollments &&
-          myEnrollments.map((enroll: any) => (
+          myEnrollments.map((enroll) => (
             <Group my="xs" key={enroll.courseNo}>
               <Text>
                 {enroll.courseNo} - {enroll.course.title}
